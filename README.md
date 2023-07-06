@@ -1,4 +1,15 @@
 # PhD Simulator
+## Build
+```bash
+sudo apt install nodejs npm
+npm install express --save
+npm run build
+```
+
+## Run
+```bash
+npm run
+```
 
 ## About
 
