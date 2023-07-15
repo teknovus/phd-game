@@ -75,7 +75,7 @@
   conditions:
   - id: Expression
     expression: "!hasStatus('brokenEquipment')"
-  probability: 0.03
+  probability: 0.01
   exclusions:
   - EquipmentRepaired
   actions:
@@ -97,7 +97,7 @@
       actions:
       - id: Random
         groups:
-        - weight: 0.4
+        - weight: 0.9
           actions:
           - id: DisplayMessage
             message: message.equipmentFixed
@@ -105,7 +105,7 @@
           - id: UpdateVariable
             variable: player.hope
             value: player.hope + 2
-        - weight: 0.6
+        - weight: 0.1
           actions:
           - id: DisplayMessage
             message: message.equipmentNotFixed
@@ -116,7 +116,7 @@
 - id: EquipmentUpgrade
   trigger: MonthBegin
   once: true
-  probability: 0.08
+  probability: 0.01
   conditions:
   - id: Expression
     expression: year >= 2 && advisor.fundingLevel >= 1 # must have sufficient funding
@@ -134,7 +134,7 @@
 - id: CloudStorage
   trigger: YearBegin
   once: true
-  probability: 0.3
+  probability: 0.01
   conditions:
   - id: Expression
     expression: year >= 2
@@ -146,80 +146,6 @@
     statusId: cloudStorage
     on: true
 # Exhaustion event
-- id: Exhaustion
-  trigger: MonthBegin
-  probability: 0.7
-  conditions:
-  - id: Expression
-    expression: "!hasStatus('exhaustion') && player.exhaustionLevel >= 12"
-  actions:
-  - id: DisplayMessage
-    message: message.exhaustion
-    confirm: message.sucks
-  - id: SetStatus
-    statusId: exhaustion
-    on: true
-- id: ExhaustionBreak
-  trigger: MonthBegin
-  conditions:
-  - id: Expression
-    expression: hasStatus('exhaustion')
-  probability: 0.5
-  actions:
-  - id: DisplayChoices
-    message: message.exhaustionBreak
-    choices:
-    - message: message.takeBreak
-      actions:
-      - id: DisplayMessage
-        message: message.recoveredAfterBreak
-        confirm: message.great
-      - id: UpdateVariables
-        updates:
-          player.exhaustionLevel: 0
-          player.monthSkipped: 1
-          player.hope: player.hope + 5
-      - id: SetStatus
-        statusId: exhaustion
-        on: false
-    - message: message.noBreak
-      actions:
-      - id: DisplayMessage
-        message: message.exhaustionIgnored
-        confirm: message.ok
-- id: ExhaustionBadMonth
-  trigger: MonthBegin
-  conditions:
-  - id: Expression
-    expression: player.exhaustionLevel >= 14
-  probability: 0.2 + player.exhaustionLevel / 50
-  actions:
-  - id: UpdateVariable
-    variable: player.monthSkipped
-    value: 1
-  - id: DisplayChoices
-    message: message.exhaustionBadMonth
-    choices:
-    - message: message.takeBreak
-      actions:
-      - id: DisplayMessage
-        message: message.recoveredAfterBreak
-        confirm: message.great
-      - id: UpdateVariables
-        updates:
-          player.exhaustionLevel: 0
-          player.hope: player.hope + 5
-      - id: SetStatus
-        statusId: exhaustion
-        on: false
-    - message: message.noBreak
-      actions:
-      - id: DisplayMessage
-        message: message.exhaustionNoProgress
-        confirm: message.ok
-      - id: UpdateVariable
-        variable: player.hope
-        value: player.hope - 5
 # Late year event
 - id: LateYearAnxiety
   trigger: YearBegin
@@ -243,7 +169,7 @@
     expression: month === 12
   actions:
   - id: CoinFlip
-    probability: player.qualifyLevel * 0.2
+    probability: player.qualifyLevel * 1
     success:
     - id: DisplayMessage
       message: message.qualifyPassed
@@ -384,14 +310,14 @@
             message: message.qualifyLevelMax
             confirm: message.great
     - message: message.readPapers
-      requirement: itemCount('paper') < rule.papersRequired
+      requirement: itemCount('paper') < rule.papersRequired && itemCount('idea') < 2
       actions:
       - id: UpdateVariable
         variable: player.readPapers
         value: player.readPapers + 1
       - id: CoinFlip
         # increase the success rate as the player reads more papers
-        probability: 0.60 + player.readPapers / 100 - itemCount('idea') / 20
+        probability: 0.99
         success:
         - id: GiveItem
           itemId: idea
@@ -403,7 +329,7 @@
           confirm: message.great
         # possibly a good idea
         - id: CoinFlip
-          probability: 0.2
+          probability: 0.99
           success:
           - id: DisplayMessage
             message: message.goodIdea
@@ -433,7 +359,7 @@
         itemId: idea
         amount: -1
       - id: CoinFlip
-        probability: min(0.50 + player.readPapers / 50, 0.8)
+        probability: 0.99
         success:
         - id: DisplayMessage
           message: message.gainPrelimResult
@@ -459,7 +385,7 @@
       actions:
       - id: Random
         groups:
-        - weight: 0.5
+        - weight: 0.99
           actions:
           - id: DisplayMessage
             message: message.gainMajorResult
@@ -471,7 +397,7 @@
           - id: UpdateVariable
             variable: player.hope
             value: player.hope + 5
-        - weight: 0.5
+        - weight: 0.01
           actions:
           - id: DisplayRandomMessage
             messages:
@@ -502,7 +428,7 @@
       actions:
       - id: Random
         groups:
-        - weight: 0.5 + calcEffectValue('player.experimentBoost', 0)
+        - weight: 0.99
           actions:
           - id: DisplayMessage
             message: message.gainFigure
@@ -513,7 +439,7 @@
           - id: UpdateVariable
             variable: player.hope
             value: player.hope + 5
-        - weight: 0.25
+        - weight: 0.01
           actions:
           - id: DisplayRandomMessage
             messages:
@@ -525,7 +451,7 @@
           - id: UpdateVariable
             variable: player.hope
             value: player.hope - 5
-        - weight: 0.15
+        - weight: 0.01
           actions:
           - id: Switch
             branches:
@@ -548,7 +474,7 @@
               - id: UpdateVariable
                 variable: player.hope
                 value: player.hope - 5
-        - weight: 0.1
+        - weight: 0.01
           actions:
           - id: DisplayMessage
             message: message.wrongFigure
@@ -563,7 +489,7 @@
       requirement: itemCount('majorResult') > 0 && itemCount('figure') >= rule.figuresRequired && itemCount('paper') < rule.papersRequired
       actions:
       - id: CoinFlip
-        probability: 0.7 + itemCount('paper') / 20
+        probability: 0.99
         success:
         - id: DisplayMessage
           message: message.draftPaperComplete
@@ -634,13 +560,13 @@
 #                                 -> reject -> resubmit ...
 - id: PaperReview
   trigger: MonthBegin
-  probability: 0.60
+  probability: 0.99
   conditions:
   - id: Expression
     expression: itemCount('submittedPaper') >= 1
   actions:
   - id: CoinFlip
-    probability: calcEffectValue('player.paperAcceptanceBoost', 0) + 0.25
+    probability: 0.99
     success:
     - id: DisplayMessage
       message: message.paperAccepted
@@ -711,8 +637,8 @@
   trigger: MonthBegin
   conditions:
   - id: Expression
-    expression: itemCount('idea') >= 1
-  probability: max(0.01, 0.20 - itemCount('conferencePaper') / 20)
+    expression: itemCount('idea') >= 4
+  probability: 0.01
   actions:
   - id: DisplayMessage
     message: message.ideaDoneByOthers
@@ -727,8 +653,8 @@
   trigger: MonthBegin
   conditions:
   - id: Expression
-    expression: itemCount('preliminaryResult') >= 1
-  probability: 0.05
+    expression: itemCount('preliminaryResult') >= 4
+  probability: 0.01
   actions:
   - id: DisplayMessage
     message: message.prelimDoneByOthers
@@ -743,10 +669,10 @@
   trigger: MonthBegin
   conditions:
   - id: Expression
-    expression: itemCount('figure') >= 3
+    expression: itemCount('figure') >= 4
   actions:
   - id: CoinFlip
-    probability: clip(0.1 - itemCount('paper') / 30, 0, 1)
+    probability: 0.01
     success:
     - id: DisplayMessage
       message: message.figureInvalid
@@ -760,7 +686,10 @@
 # Progress advancement events
 - id: Seminar
   trigger: MonthBegin
-  probability: 0.05
+  probability: 0.99
+  conditions: 
+  - id: Expression
+    expression: itemCount('idea') < 1 && (itemCount('preliminaryResult') + itemCount('majorResult')  + itemCount('paper') < 3)
   actions:
   - id: DisplayRandomMessage
     messages:
@@ -772,10 +701,10 @@
     amount: 1
 - id: ShowerIdea
   trigger: MonthBegin
-  probability: 0.03
+  probability: 0.99
   conditions:
   - id: Expression
-    expression: itemCount('preliminaryResult') >= 1
+    expression: itemCount('preliminaryResult') >= 1 && itemCount('majorResult') <= 3
   actions:
   - id: DisplayMessage
     message: message.showerIdea
@@ -923,7 +852,7 @@
   once: true
   conditions:
   - id: Expression
-    expression: month >= 6 && player.qualifyLevel <= 2
+    expression: month >= 6 && player.qualifyLevel <= 0
   actions:
   - id: DisplayMessage
     message: message.qualifyReminder
@@ -936,7 +865,7 @@
   once: true
   conditions:
   - id: Expression
-    expression: itemCount('idea') >= 4
+    expression: itemCount('idea') >= 99
   actions:
   - id: DisplayMessage
     message: message.tooManyIdeas
@@ -960,7 +889,7 @@
 - id: RejectedPaper
   trigger: MonthBegin
   once: true
-  probability: 0.8
+  probability: 0.01
   conditions:
   - id: Expression
     expression: itemCount('rejectedPaper') > 0
